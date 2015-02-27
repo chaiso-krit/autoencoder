@@ -1,8 +1,14 @@
 # autoencoder
 Autoencoder using Theano library
 
-Prerequire:
+##Prerequire:
   - python-numpy python-scipy python-pip python-matplotlib
-    sudo apt-get install python-numpy python-scipy python-pip python-matplotlib
+  
+  ```sh
+  $ sudo apt-get install python-numpy python-scipy python-pip python-matplotlib
+  ```
   - theano Library
-    sudo pip install theano
+  
+  ```sh
+  $ sudo pip install theano
+  ```
