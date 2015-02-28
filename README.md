@@ -12,3 +12,15 @@ Autoencoder using Theano library
   ```sh
   $ sudo pip install theano
   ```
+
+##How To Use:
+  - Using CPU 
+  
+  ```sh
+  $ python sparse_autoencoder.py
+  ```
+  - Using GPU
+  
+  ```sh
+  $ THEANO_FLAGS=mode=FAST_RUN,device=gpu,floatX=float32 python sparse_autoencoder.py
+  ```
