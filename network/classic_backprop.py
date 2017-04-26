@@ -7,7 +7,7 @@ from network import Network
 import matplotlib.pyplot as plt
 
 class BackProp(object):
-    def __init__(self, nnet, dataset=None, learning_rate=0.01, momentum=0.0):
+    def __init__(self, nnet, input_x, dataset=None, learning_rate=0.01, momentum=0.0):
         if len(dataset) != 2:
             print "Error dataset must contain tuple (train_data,train_target)"
 
@@ -39,7 +39,7 @@ class BackProp(object):
             outputs=cost,
             updates=updates,
             givens={
-                x: shared_train_data
+                input_x: shared_train_data
             }
         )
     
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     x = T.matrix('x')
 
     nnet = Network(input=x, layers=(2,2,1))
-    trainer = BackProp(nnet=nnet, dataset=ds, learning_rate=0.5)
+    trainer = BackProp(nnet=nnet, input_x=x, dataset=ds, learning_rate=0.5)
 
     errors = trainer.train_epochs(600)
 
