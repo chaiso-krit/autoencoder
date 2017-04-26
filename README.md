@@ -1,7 +1,7 @@
 # autoencoder
-Autoencoder using Theano library
+Autoencoder using Theano library, following the [UFLDL Tutorial](http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder),Stanford University
 
-##Prerequire:
+## Prerequire:
   - python-numpy python-scipy python-pip python-matplotlib
   
   ```sh
@@ -13,7 +13,7 @@ Autoencoder using Theano library
   $ sudo pip install theano
   ```
 
-##How To Use:
+## How To Use:
   - Using CPU 
   
   ```sh
