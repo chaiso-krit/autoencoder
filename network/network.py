@@ -40,14 +40,31 @@ class Network(object):
 
     def create_network(self, hidden_layer, output_layer):
         self.hiddenLayer = []
-        self.params = []
+        params = []
         for layer in hidden_layer:
             self.hiddenLayer.append(layer)
-            self.params += layer.params
+            if layer.theta is not None:
+                params.append(layer.theta)
         self.outputLayer = output_layer
         self.output = self.outputLayer.output
-        self.params += output_layer.params
+        if output_layer.theta is not None:
+            params.append(output_layer.theta)
 
+        self.params = params
+
+    def set_weight(self, weight_vector):
+        weight_count = 0
+        for layer in self.hiddenLayer:
+            layer.theta.set_value(weight_vector[weight_count:weight_count + layer.theta_size])
+            weight_count += layer.theta_size
+        self.outputLayer.theta.set_value(weight_vector[weight_count:weight_count + self.outputLayer.theta_size])
+
+    def get_weight_size(self):
+        weight_size = 0
+        for layer in self.hiddenLayer:
+            weight_size += layer.theta_size
+        weight_size += self.outputLayer.theta_size
+        return weight_size
 
     def save(self, filename):
         fptr = open(filename,'w')

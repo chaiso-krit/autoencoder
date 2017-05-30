@@ -24,36 +24,30 @@ class Autoencoder(object):
         avg_activate = T.mean(nnet.hiddenLayer[0].output, axis=0)
         sparsity_penalty = beta*T.sum(T.mul(T.log(sparsity/avg_activate), sparsity) + T.mul(T.log((1-sparsity)/T.sub(1,avg_activate)), (1-sparsity)))
 
-        regularization = 0.5*weight_decay*(T.sum(T.pow(nnet.params[0],2)) + T.sum(T.pow(nnet.params[2],2)))
+        regularization = 0.5*weight_decay*(T.sum(T.pow(nnet.params[0][0:64*25],2)) + T.sum(T.pow(nnet.params[1][0:25*64],2)))
 
         cost = square_error + sparsity_penalty + regularization
         
         gparams = [T.grad(cost, param) for param in nnet.params]
-
-        w_deltas = []
-        for param in nnet.params:
-            w_deltas.append(theano.shared(value=param.get_value()*0, borrow=True))
-
-        new_params = [param - (learning_rate*gparam + momentum*w_delta) for param, gparam, w_delta in zip(nnet.params, gparams, w_deltas)]
-
-        updates = [(param, new_param) for param, new_param in zip(nnet.params, new_params)]
-        updates += [(w_delta, learning_rate*gparam + momentum*w_delta) for w_delta, gparam in zip(w_deltas, gparams)]
-
+  
         index = T.lscalar()
-        self.train = theano.function(
+
+        self.batch_grad = theano.function(
             inputs=[index],
-            outputs=cost,
-            updates=updates,
+            outputs=T.concatenate(gparams),
             givens={
                 input: train_data[index * batch_size: (index + 1) * batch_size],
                 target: train_target[index * batch_size: (index + 1) * batch_size]
             }
         )
 
-        self.cost = theano.function(
-            inputs=[],
+        self.batch_cost = theano.function(
+            inputs=[index],
             outputs=cost,
-            givens={ input: train_data, target: train_target }
+            givens={
+                input: train_data[index * batch_size: (index + 1) * batch_size],
+                target: train_target[index * batch_size: (index + 1) * batch_size]
+            }
         )
 
 def shared_dataset(data_xy, borrow=True):
@@ -75,19 +69,49 @@ if __name__ == "__main__":
     trainer = Autoencoder(nnet=nnet, dataset=ds, learning_rate=1.2, beta=3.0, sparsity=0.01, weight_decay=0.0001)
 
     print 'N Batch:', n_batch
-    print "epochs 0 \t", trainer.cost()
-    index_array = [i for i in xrange(n_batch)]
-    for i in range(7000):
-        random.shuffle(index_array)
-        for index in index_array[:8]:
-            trainer.train(index)
 
-        if (i+1) % 1 == 0:
-            print "epochs", i+1, "\t", trainer.cost()
-    
+    def train_fn(theta_values):
+        nnet.set_weight(theta_values)
+        train_losses = [trainer.batch_cost(batch_index) for batch_index in xrange(n_batch)]
+        return numpy.mean(train_losses)
+
+    def train_fn_grad(theta_values):
+        nnet.set_weight(theta_values)
+        grad = trainer.batch_grad(0)
+        for batch_index in xrange(1, n_batch):
+            grad += trainer.batch_grad(batch_index)
+        return grad/n_batch
+
+    global epoch_counter
+    epoch_counter = 0
+    def callback(theta_values):
+        global epoch_counter
+        cost = train_fn(theta_values)
+        epoch_counter += 1
+        print "epochs", epoch_counter, cost
+        
+    rng = numpy.random.RandomState()
+    weight_values = numpy.asarray(
+        rng.uniform(
+            low=-(numpy.sqrt(.5)),
+            high=(numpy.sqrt(.5)),
+            size=nnet.get_weight_size()),
+            dtype=theano.config.floatX
+        )
+
+    import scipy.optimize
+    best_w_b = scipy.optimize.fmin_cg(
+        f=train_fn,
+        x0=weight_values,
+        fprime=train_fn_grad,
+        callback=callback,
+        disp=0,
+        maxiter=1000
+    )
+
     # Visualize
 
-    weight = nnet.params[0].get_value()
+    weight = nnet.hiddenLayer[0].W.eval()
     weight = numpy.transpose(weight)
     weight = weight - weight.mean()
     size = numpy.absolute(weight).max()
