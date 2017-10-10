@@ -28,7 +28,7 @@ class LinearFunction(Model):
         #print max_data.high, max_data.volume
         result = []
         for i in xrange(len(stock_data)):
-            new_data = StockData(0, 0, 0, 0, 0)
+            new_data = StockData(0, 0, 0, 0, 0, '19910101')
             new_data.open = stock_data[i].open / max_data.high
             new_data.high = stock_data[i].high / max_data.high
             new_data.low = stock_data[i].low / max_data.high

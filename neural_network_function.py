@@ -45,13 +45,11 @@ class NeuralNetworkFunction(Model):
     def normalize(self, stock_data):
         max_data = StockData(0, 0, 0, 0, 0)
         for data in stock_data:
-            #print data.high, data.volume
             if data.high > max_data.high:
                 max_data.high = data.high
             if data.volume > max_data.volume:
                 max_data.volume = data.volume
 
-        #print max_data.high, max_data.volume
         result = []
         for i in xrange(len(stock_data)):
             new_data = StockData(0, 0, 0, 0, 0)
@@ -70,7 +68,6 @@ class NeuralNetworkFunction(Model):
 
     def generate_input(self, state, history, buy_price):
         input_list = [0.0 for i in xrange(60*5+3)]
-        #print 'len',len(history)
         if buy_price == 0:
             input_list[0] = 0
         else:
@@ -118,7 +115,6 @@ class NeuralNetworkFunction(Model):
         max_output = self.get_q_for_action(input_list, actions[0])
         for a in actions[1:]:
             output = self.get_q_for_action(input_list, a)
-            #print a,output
             if output > max_output:
                 max_output = output
         return max_output
@@ -183,7 +179,6 @@ class NeuralNetworkFunction(Model):
         max_a = actions[0]
         for a in actions[1:]:
             output = self.get_Q(state, a, history, buy_price)
-            #print a,output
             if output > max_output:
                 max_output = output
                 max_a = a
@@ -193,8 +188,7 @@ class NeuralNetworkFunction(Model):
 
 if __name__ == '__main__':
     model = NeuralNetworkFunction()
-    model.load('model/neural.model')
-    model.random_action = False
+
     epsilon = 0.05
     discount_factor = 0.9
     memory_list = []
@@ -216,7 +210,6 @@ if __name__ == '__main__':
                     a = 'wait_sell'
             else:
                 a, q_value = model.get_action(g)
-                #model.print_q()
 
             q_array.append(q_value)
             old_state = model.generate_input_from_game(g)

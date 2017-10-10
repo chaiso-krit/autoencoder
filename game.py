@@ -1,5 +1,4 @@
 from read_data import Data
-import random
 
 class Game:
     start_money = 5000
@@ -70,29 +69,30 @@ class Game:
             return True
 
 if __name__ == '__main__':
-    count = [0 for i in xrange(100)]
+    import random
+
     data = []
-    for i in xrange(10000):
+    for i in xrange(50000):
         if (i + 1) % 1000 == 1:
             print 'iter :', i+1
+
         game = Game('ABICO')
         while not game.is_stop():
             action = game.get_actions()
             a = random.choice(action)
-            res = game.take_action(a)
+            result = game.take_action(a)
             #print a, game.state, game.money
 
         data.append(game.money)
-        if game.money < 0:
-            count[0] += 1
-        elif game.money >= 200000:
-            count[-1] += 1
-        else:
-            count[int(game.money/2000)] += 1
 
-    print sum(data)/len(data)
-    for i in xrange(len(count)):
-        print i*1000, count[i]
+    print 'Avg Money Left:',sum(data)/len(data)
+    
+    import matplotlib.pyplot as plt
+    
+    plt.hist(data, 1000, range=(0,20000))
+    plt.xlabel('Money left')
+    plt.ylabel('Count')
+    plt.show()
 
 
 

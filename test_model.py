@@ -13,16 +13,26 @@ if __name__ == '__main__':
     s = g.get_current_state()
     a, q = model.get_action(g)
 
-    day_no = 1
+    money_list = [g.money]
+    date_list = [g.history[-1].date]
     while not g.is_stop():
-        print 'Day ', day_no,'\t'+a,'\t'+s,  g.money
-        day_no += 1
+        #print 'Date ', g.history[-1].date,'\t'+a,'\t'+s,  g.money
         #model.print_q()
         r,s_prime = g.take_action(a)
+        money_list.append(g.money)
+        date_list.append(g.history[-1].date)
         a_prime, q = model.get_action(g)
         #print r, q_old, q_new, delta, g.money,
         s = s_prime
         a = a_prime
+
+    import matplotlib.pyplot as plt
+
+    plt.plot(date_list, money_list)
+    plt.xlabel('Years')
+    plt.ylabel('Current asset')
+    plt.show()
+     
 
 
 
